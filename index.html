@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Notas Adesivas</title>
+    <style>
+        /* Reset básico e configurações gerais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        /* Formulário de entrada */
+        .input-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+            min-width: 250px;
+        }
+
+        #taskInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #addBtn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+
+        #addBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        #addBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Grid de notas */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Estilos das notas adesivas */
+        .sticky-note {
+            background: #fff8b4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+            transform: rotate(-1deg);
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+            border-left: 5px solid #f0e68c;
+        }
+
+        .sticky-note:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        .sticky-note:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Cores pastel para as notas */
+        .sticky-note.color-1 { background: #fff8b4; border-left-color: #f0e68c; }
+        .sticky-note.color-2 { background: #ffb3ba; border-left-color: #ff8a95; }
+        .sticky-note.color-3 { background: #baffc9; border-left-color: #8cf5a3; }
+        .sticky-note.color-4 { background: #bae1ff; border-left-color: #87ceeb; }
+        .sticky-note.color-5 { background: #ffffba; border-left-color: #ffff8d; }
+        .sticky-note.color-6 { background: #ffdfba; border-left-color: #ffc47e; }
+        .sticky-note.color-7 { background: #e0bbff; border-left-color: #d8a2ff; }
+        .sticky-note.color-8 { background: #ffb3ff; border-left-color: #ff8aff; }
+
+        /* Texto da tarefa */
+        .task-text {
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+        }
+
+        /* Estado concluído */
+        .sticky-note.completed {
+            opacity: 0.6;
+            transform: scale(0.95);
+        }
+
+        .sticky-note.completed .task-text {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        /* Botões de ação */
+        .note-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .complete-btn {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .complete-btn:hover {
+            background: rgba(76, 175, 80, 0.3);
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background: rgba(244, 67, 54, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Estado vazio */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.2em;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .empty-state .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Animações */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px) rotate(-5deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) rotate(-1deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(20px) scale(0.8);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .input-section {
+                padding: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            #taskInput {
+                min-width: 100%;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .sticky-note {
+                transform: rotate(0deg);
+            }
+            
+            .sticky-note:nth-child(even) {
+                transform: rotate(0deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .input-section {
+                padding: 15px;
+            }
+            
+            .sticky-note {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho da aplicação -->
+    <div class="container">
+        <div class="header">
+            <h1>🗒️ Minhas Notas Adesivas</h1>
+            <p>Organize suas tarefas de forma divertida e colorida!</p>
+        </div>
+
+        <!-- Seção de entrada para novas tarefas -->
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Digite sua tarefa aqui..." maxlength="200">
+                <button id="addBtn">➕ Adicionar</button>
+            </div>
+        </div>
+
+        <!-- Grid onde as notas serão exibidas -->
+        <div class="notes-grid" id="notesGrid">
+            <!-- Estado inicial vazio -->
+            <div class="empty-state" id="emptyState">
+                <span class="emoji">📝</span>
+                <p>Nenhuma tarefa ainda.<br>Adicione uma tarefa para começar!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let taskCounter = 0; // Contador para IDs únicos das tarefas
+        const colors = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6', 'color-7', 'color-8'];
+        
+        // Elementos do DOM
+        const taskInput = document.getElementById('taskInput');
+        const addBtn = document.getElementById('addBtn');
+        const notesGrid = document.getElementById('notesGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        // Event listeners
+        addBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Função para adicionar uma nova tarefa
+        function addTask() {
+            const taskText = taskInput.value.trim();
+            
+            // Validação: verifica se o texto não está vazio
+            if (taskText === '') {
+                // Animação de erro no input
+                taskInput.style.borderColor = '#f44336';
+                setTimeout(() => {
+                    taskInput.style.borderColor = '#e0e0e0';
+                }, 1000);
+                return;
+            }
+
+            // Esconde o estado vazio se existir
+            hideEmptyState();
+
+            // Cria o elemento da nota adesiva
+            const noteElement = createNoteElement(taskText);
+            
+            // Adiciona a nota ao grid
+            notesGrid.appendChild(noteElement);
+            
+            // Limpa o input
+            taskInput.value = '';
+            
+            // Foca no input para próxima tarefa
+            taskInput.focus();
+        }
+
+        // Função para criar o elemento HTML da nota
+        function createNoteElement(taskText) {
+            const noteDiv = document.createElement('div');
+            const noteId = `note-${taskCounter++}`;
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            noteDiv.className = `sticky-note ${randomColor}`;
+            noteDiv.id = noteId;
+            
+            noteDiv.innerHTML = `
+                <div class="task-text">${escapeHtml(taskText)}</div>
+                <div class="note-actions">
+                    <button class="action-btn complete-btn" onclick="toggleComplete('${noteId}')">
+                        ✅ Concluído
+                    </button>
+                    <button class="action-btn delete-btn" onclick="deleteNote('${noteId}')">
+                        🗑️ Apagar
+                    </button>
+                </div>
+            `;
+            
+            return noteDiv;
+        }
+
+        // Função para alternar estado concluído/não concluído
+        function toggleComplete(noteId) {
+            const noteElement = document.getElementById(noteId);
+            const completeBtn = noteElement.querySelector('.complete-btn');
+            
+            if (noteElement.classList.contains('completed')) {
+                // Desmarcar como concluída
+                noteElement.classList.remove('completed');
+                completeBtn.innerHTML = '✅ Concluído';
+            } else {
+                // Marcar como concluída
+                noteElement.classList.add('completed');
+                completeBtn.innerHTML = '↩️ Desfazer';
+            }
+        }
+
+        // Função para apagar uma nota com animação
+        function deleteNote(noteId) {
+            const noteElement = document.getElementById(noteId);
+            
+            // Adiciona animação de saída
+            noteElement.style.animation = 'slideOut 0.3s ease-out forwards';
+            
+            // Remove o elemento após a animação
+            setTimeout(() => {
+                noteElement.remove();
+                
+                // Verifica se precisa mostrar o estado vazio
+                checkEmptyState();
+            }, 300);
+        }
+
+        // Função para esconder o estado vazio
+        function hideEmptyState() {
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+        }
+
+        // Função para verificar e mostrar estado vazio se necessário
+        function checkEmptyState() {
+            const notes = notesGrid.querySelectorAll('.sticky-note');
+            
+            if (notes.length === 0) {
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                } else {
+                    // Recria o estado vazio se não existir
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'empty-state';
+                    emptyDiv.id = 'emptyState';
+                    emptyDiv.innerHTML = `
+                        <span class="emoji">📝</span>
+                        <p>Nenhuma tarefa ainda.<br>Adicione uma tarefa para começar!</p>
+                    `;
+                    notesGrid.appendChild(emptyDiv);
+                }
+            }
+        }
+
+        // Função para escape de HTML (previne XSS)
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Foca no input quando a página carrega
+        window.addEventListener('load', function() {
+            taskInput.focus();
+        });
+
+        // Previne o zoom no iOS quando o input é focado
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            taskInput.addEventListener('focus', function() {
+                this.style.fontSize = '16px';
+            });
+        }
+    </script>
+</body>
+</html>
